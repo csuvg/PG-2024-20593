@@ -1,11 +1,12 @@
 import os
 import logging
 from datetime import datetime as dt
-from flask import Blueprint, jsonify  # , make_response
+from flask import Blueprint, jsonify
 from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 import json
 import pandas as pd
+import requests  # Para poder solicitar contenido desde GitHub
 
 load_dotenv("./environment/.env")
 
@@ -16,50 +17,69 @@ geojson_api = Blueprint('geojson_api', __name__)
 LOG_ROUTE = './logs/activity/'
 CONNECT_STR = os.getenv('AZURE_STORAGE_CONNECTION_STRING')
 CONTAINER_NAME = "tchgeopandas"  # Replace with your container name
-BLOB_NAME = "outputv6.geojson"          # Replace with your blob name
+BLOB_NAME = "outputv6.geojson"   # Replace with your blob name
+RAW_URL = "https://raw.githubusercontent.com/Jack200133/tchapi/master/data/outputv6.geojson"
+
 
 if not os.path.exists(LOG_ROUTE):
     os.makedirs(LOG_ROUTE)
 
-log_filename = LOG_ROUTE + "application_" + \
-    dt.now().strftime('%d_%m_%Y') + ".log"
+log_filename = os.path.join(
+    LOG_ROUTE,
+    "application_" + dt.now().strftime('%d_%m_%Y') + ".log"
+)
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler(log_filename), logging.StreamHandler()])
+    handlers=[logging.FileHandler(log_filename), logging.StreamHandler()]
+)
 logger = logging.getLogger(__name__)
-
-# Endpoint to get the GeoJSON file
 
 
 @geojson_api.route('/get_geojson', methods=['GET'])
 def get_geojson():
     logger.info("Received request to get GeoJSON file.")
     try:
-        # Create the BlobServiceClient object
+        # Verificar si existe la cadena de conexión
+        if not CONNECT_STR:
+            # Si no existe, obtenemos el archivo desde GitHub
+            logger.info("Obteniendo archivo desde GitHub...")
+            response = requests.get(RAW_URL)
+            if response.status_code == 200:
+                geojson_content = json.loads(response.text)
+                logger.info("GeoJSON file obtenido desde GitHub.")
+                return jsonify(geojson_content)
+            else:
+                logger.error(f"Error en GitHub.{response.status_code}")
+                return jsonify(
+                    {'error':
+                     'No se pudo obtener el archivo desde GitHub'}), 500
+
+        # Si CONNECT_STR existe, usamos Azure
+        logger.info("Descargando desde Azure Blob Storage...")
         blob_service_client = BlobServiceClient.from_connection_string(
             CONNECT_STR)
         logger.info("Azure BlobServiceClient created successfully.")
 
-        # Get the BlobClient
         blob_client = blob_service_client.get_blob_client(
-            container=CONTAINER_NAME, blob=BLOB_NAME)
+            container=CONTAINER_NAME,
+            blob=BLOB_NAME
+        )
         logger.info(
-            f"BlobClient for container '{CONTAINER_NAME}'"
-            + f" and blob '{BLOB_NAME}' obtained successfully.")
+            f"BlobClient for container '{CONTAINER_NAME}' "
+            f"and blob '{BLOB_NAME}' obtained successfully."
+        )
 
-        # Download the blob's content to memory
+        # Descargar el blob a memoria
         downloader = blob_client.download_blob()
         geojson_bytes = downloader.readall()
-        logger.info(
-            "GeoJSON file downloaded successfully from Azure Blob Storage.")
+        logger.info("GeoJSON file downloaded successfully from Azure")
 
-        # Parse the GeoJSON bytes to a dictionary
+        # Parsear el contenido a un objeto de Python
         geojson_content = json.loads(geojson_bytes)
         logger.info("GeoJSON content parsed successfully.")
 
-        # Return the GeoJSON content as a JSON response
         return jsonify(geojson_content)
 
     except Exception as e:
