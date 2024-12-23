@@ -1,0 +1,18 @@
+{
+    "prod_mad": [
+        "Bioestimulante",
+        "Bispiribac ",
+        "Glifosato",
+        "Glifosato + Boro",
+        "Glifosato + Etephon",
+        "Madurez Natural",
+        "Protectante",
+        "Trinexapac",
+        "Trinexapac + Boro",
+        "Trinexapac + Etephon"
+    ],
+    "tipo_cosecha": {
+        "0": "MANUAL",
+        "1": "MECANICO"
+    }
+}
