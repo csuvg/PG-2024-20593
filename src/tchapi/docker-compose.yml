@@ -1,0 +1,15 @@
+services:
+  tchapi:
+    image: tchapi
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/flask/data
+      - ./logs/:/flask/logs
+      - ./environment/:/flask/environment
+    networks:
+      uvgpanta:
+        aliases:
+          - tchprocessor
+networks:
+  uvgpanta:

@@ -1,0 +1,368 @@
+---
+title: "Analisis TCH"
+author: "Juan Angel CArrera"
+format: html
+editor: visual
+---
+
+```{r echo=F, include=F, load_libraries}
+library(readxl)
+library(dplyr)
+library(hopkins)
+library(factoextra)
+library(ggrepel)
+library(cluster)
+library(flexclust)
+library(FeatureImpCluster)
+library(stringr)
+library(tidyr)
+library(stats)
+library(graphics)
+library(NbClust)
+library(mclust)
+library(GGally)
+library(corrplot)
+library(caret)
+library(ggplot2)
+library(kableExtra)
+library(nortest)
+```
+
+```{r echo=F,include=F}
+datos <- read_excel("./Pruebas/BASE_ENTRENAMIENTO_VALIDACION_GT_NI.xlsx",
+                    sheet = "entrenamiento_gt")
+
+datos_indice <- read_excel("./Pruebas/INDICES/GT_INDICES_NAX.xlsx",
+                    sheet = "INDICES")
+
+datos_clima <- read_excel("./Pruebas/CLIMA/GT_CLIMA.xlsx",
+                    sheet = "Reporte")
+
+
+```
+
+# Análisis exploratorio
+
+## 1. Resumen del Conjunto de datos
+
+El conjunto de datos está compueto por 3 base de datos, una del corte, una del clima y una de los indices.
+
+El conjunto de datos del corte tiene `r nrow(datos)` filas y `r ncol(datos)` columnas.
+
+El resumen del conjunto de datos el siguente:
+
+```{r}
+summary(datos)
+```
+
+El conjunto de datos los indices tiene `r nrow(datos_indice)` filas y `r ncol(datos_indice)` columnas.
+
+El resumen del conjunto de datos el siguente:
+
+```{r}
+summary(datos_indice)
+```
+
+El conjunto de datos del clima tiene `r nrow(datos_clima)` filas y `r ncol(datos_clima)` columnas.
+
+El resumen del conjunto de datos el siguente:
+
+```{r}
+
+summary(datos_clima)
+```
+
+## 2. Tipo de cada Variable de los Datasets
+
+#### Datos de Cosecha
+
+-   **ID:** (ZAFRA + TERRENO)
+-   **TIPO_MUESTRA:** (AUN NO EXPLICADO) Cualitativa Nominal \*
+-   **ZAFRA:** (AÑO DE LA ZAFRA) Cualitativa Ordinal
+-   **TERRENO:** (TERRENO DE LA ZAFRA ) Cualitativa Nominal
+-   **FECHA:** (FECHA DE LA MUESTRA) Cualitativa Ordinal
+-   **FI:** (FECHA DE INICIO DE LA ZAFRA) Cualitativa Ordinal
+-   **FF:** (FECHA DE FIN DE LA ZAFRA) Cualitativa Ordinal
+-   **AREA:** (AREA DEL TERRENO) Cuantitativa Continua
+-   **PROD_MAD:** (TIPO DE MADURACION USADA) Cualitativa Nominal
+-   **FECHA_MAD:** (FECHA DE MADURACION) Cuantitativa Continua \| NaN si no tiene tipo de maduración
+-   **ESTACION:** (ESTACION METEOROLOGICA) Cualitativa
+-   **VARIEDAD:** (VARIEDAD DE CAÑA) Cualitativa Nominal
+-   **NUMERO_CORTE:** (NUMERO DE CORTE) Cuantitativa Discreta
+-   **SIST_RIEGO:** (SISTEMA DE RIEGO) Cualitativa Nominal
+-   **TIPO_COSECHA:** (TIPO DE COSECHA) Cualitativa Nominal
+-   **REGION:** (REGION DEL TERRENO) Cualitativa Nominal
+-   **ESTRATO:** (ESTRATO DEL TERRENO) Cualitativa Nominal
+-   **CUADRANTE:** (CUADRANTE DEL TERRENO) Cualitativa Nominal
+-   **MES_MUESTRA:** (AUN NO EXPLICADO) Cualitativa Ordinal \*
+-   **MES_CORTE:** (MES DE CORTE) Cualitativa Ordinal
+-   **EDAD_PROYECTADA:** (DIAS DE VIDA DE LA ZAFRA AL FINAL DEL CORTE) Cuantitativa Discreta
+-   **EDAD_ACT:** (DIAS DE VIDA DE LA ZAFRA AL INICIO DEL CORTE) Cuantitativa Discreta
+-   **DIAS_CORTE:** (DIAS DE DIFERENCIA ENTRE EL CORTE Y LA MUESTRA) Cuantitativa Discreta
+-   **SEMANA_CORTE:** (SEMANA DE CORTE) Cuantitativa Discreta \*
+-   **PRODUCTO_ACTUAL:** (TIPO DE MADURACION AGAIN???) Cualitativa Nominal \*
+-   **ESTATUS_MAD:** (ESTADO DE MADURACION) Cualitativa Nominal \*
+-   **RENDIMIENTO:** (TONELADAS DE CAÑA POR HECTAREA) Cuantitativa Continua
+
+#### Datos de Indices de la Caña
+
+-   **IDCOMP:** (PANTONE) Cualitativa Nominal
+-   **ABS_IDCOMP:** (TERRENO) Cualitativa Nominal
+-   **FECHA:** (FECHA DE LA MUESTRA) Cualitativa Ordinal
+-   **NDVI_POND:** (Índice de Vegetación de Diferencia Normalizada (NDVI) ponderado) Cuantitativa Continua
+-   **AGUA_POND:** (Índice de contenido de agua ponderado) Cuantitativa Continua
+-   **LAI_POND:** (Índice de Área Foliar ponderado) Cuantitativa Continua
+-   **PRODUCCION_PON:** (Índice de Producción ponderado) Cuantitativa Continua
+-   **ANOMALIAS_POND:** (Índice de Anomalías ponderado) Cuantitativa Continua
+-   **NITROGENADO_POND:** (Índice de Nitrógeno ponderado) Cuantitativa Continua
+-   **MADURACION_POND:** (Índice de Maduración ponderado) Cuantitativa Continua
+-   **HUMEDAD_POND:** (Índice de Humedad ponderado) Cuantitativa Continua
+-   **ESTATUS_COSECHA:** (ESTADO DE LA COSECHA) Cualitativa Nominal
+
+#### Datos de Clima
+
+-   **Zafra:** (AÑO DE LA ZAFRA) Cualitativa Ordinal
+-   **Año:** (AÑO DE LA MUESTRA) Cualitativa Ordinal
+-   **Mes:** (MES DE LA MUESTRA) Cualitativa Ordinal
+-   **Día:** (DIA DE LA MUESTRA) Cualitativa Ordinal
+-   **Cuadrante:** (CUADRANTE DEL TERRENO) Cualitativa Nominal
+-   **Estrato:** (ESTRATO DEL TERRENO) Cualitativa Nominal
+-   **Región:** (REGION DEL TERRENO) Cualitativa Nominal
+-   **estatus:** (AUN NO EXPLICADO) Cualitativa Nominal \*
+-   **ETP:** (EVAPOTRANSPIRACION) Cuantitativa Continua
+-   **Radiacion (MJ/m2):** (RADIACION ?) Cuantitativa Continua \^\^
+-   **Amplitud Térmica:** (AMPLITU DE TEMPERATURA) Cuantitativa Continua
+-   **R0:** (RADIACION SOLAR) Cuantitativa Continua \*
+-   **Estacion:** (ESTACION METEOROLOGICA) Cualitativa Nominal
+-   **Fecha:** (FECHA DE LA MUESTRA) Cualitativa Ordinal
+-   **temperatura:** (TEMPERATURA EN CELCIUS) Cuantitativa Continua
+-   **temperatura minima:** (TEMPERATURA MINIMA EN CELCIUS) Cuantitativa Continua
+-   **temperatura maxima:** (TEMPERATURA MAXIMA EN CELCIUS) Cuantitativa Continua
+-   **radiacion:** (RADIACION ?) Cuantitativa Continua \^\^
+-   **radiacion promedio:** (RADIACION PROMEDIO ?) Cuantitativa Continua \^\^
+-   **humedad relativa:** (HUMEDAD RELATIVA) Cuantitativa Continua
+-   **humedad relativa minima:** (HUMEDAD RELATIVA MINIMA) Cuantitativa Continua
+-   **humedad relativa maxima:** (HUMEDAD RELATIVA MAXIMA) Cuantitativa Continua
+-   **precipitacion:** (PRECIPITACION) Cuantitativa Continua
+-   **velocidad viento:** (VELOCIDAD DEL VIENTO) Cuantitativa Continua
+-   **velocidad viento minima:** (VELOCIDAD DEL VIENTO MINIMA) Cuantitativa Continua
+-   **velocidad viento maxima:** (VELOCIDAD DEL VIENTO MAXIMA) Cuantitativa Continua
+-   **mojadura:** (MOJADURA) Cuantitativa Continua \*
+-   **presion atmosferica:** (PRESION ATMOSFERICA DEL TERRENO) Cuantitativa Continua
+-   **presion atmosferica minima:** (PRESION ATMOSFERICA MINIMA DEL TERRENO) Cuantitativa Continua
+-   **presion atmosferica maxima:** (PRESION ATMOSFERICA MAXIMA DEL TERRENO) Cuantitativa Continua
+-   **direccion viento:** (DIRECCION DEL VIENTO) Cuantitativa Continua
+
+## 3. Pruebas de Normalidad para Cuantitativas
+
+```{r echo=F}
+## Dato
+numeric_vars <- c('area','numero_corte','edad_proyectada','edad_act','rendimiento')
+
+numericas <- datos[,numeric_vars]
+
+## Indice
+numeric_vars_indice <- c('NDVI_POND','AGUA_POND','LAI_POND','PRODUCCION_PON','ANOMALIAS_POND','NITROGENADO_POND','MADURACION_POND','HUMEDAD_POND')
+
+numericas_indices <- datos_indice[,numeric_vars_indice]
+
+## Clima
+numeric_vars_clima <- c('ETP','Radiacion (MJ/m2)','Amplitud Térmica',
+                        'R0','temperatura','temperatura minima',
+                        'temperatura maxima','radiacion',
+                        'radiacion promedio','humedad relativa',
+                        'humedad relativa minima',
+                        'humedad relativa maxima','precipitacion',
+                        'velocidad viento','velocidad viento minima',
+                        'velocidad viento maxima', 'mojadura',
+                        'presion atmosferica', 'presion atmosferica minima',
+                        'presion atmosferica maxima', 'direccion viento')
+
+numericas_clima <- datos_clima[,numeric_vars_clima]
+
+```
+
+### Qqnorms
+
+#### Datos de Cosecha
+
+```{r echoF}
+library(dlookr)
+library(dplyr)
+
+diagnose(datos)
+plot_normality(numericas)
+```
+
+En diferentes variables, tales como *Edad_act* es posible observar que la distribución de los datos, al observar el histograma se asemeja a ser normal. Sin embargo, al realizar la qqplot, tiene datos muy lejanos a la recta teórica. Esto sucede igualmente con variables como *GarageArea*, donde en el histograma pareciera asemejarse a la forma normal.
+
+De los qqplots podemos observar que, visualmente, solo el *rendimiento* tiene una distribucion normal. Las demas se ajustan a la linea teorica, sin embargo, para estas las colas estan alejadas de la linea teorica.
+
+#### Datos Indices
+
+```{r echo=F}
+plot_normality(numericas_indices)
+```
+
+#### Datos clima
+
+```{r echo=F}
+plot_normality(numericas_clima)
+```
+
+```{r echo=F}
+for (i in 1:ncol(numericas)){
+  qqnorm(numericas[[i]], main = colnames(numericas)[i])
+  qqline(numericas[[i]], col = 'red')
+}
+
+for (i in 1:ncol(numericas_indices)){
+  qqnorm(numericas_indices[[i]], main = colnames(numericas_indices)[i])
+  qqline(numericas_indices[[i]], col = 'red')
+}
+
+for (i in 1:ncol(numericas_clima)){
+  qqnorm(numericas_clima[[i]], main = colnames(numericas_clima)[i])
+  qqline(numericas_clima[[i]], col = 'red')
+}
+```
+
+### Lilliefors
+
+```{r echo=F}
+lillie_test <- sapply(numericas, function(x) {
+  if (inherits(x, "difftime")) {
+    x <- as.numeric(x)
+  }
+  lillie.test(x)$p.value
+})
+lillie_test
+
+lillie_test_indices <- sapply(numericas_indices, function(x) {
+  if (inherits(x, "difftime")) {
+    x <- as.numeric(x)
+  }
+  lillie.test(x)$p.value
+})
+lillie_test_indices
+
+lillie_test_clima <- sapply(numericas_clima, function(x) {
+  if (inherits(x, "difftime")) {
+    x <- as.numeric(x)
+  }
+  lillie.test(x)$p.value
+})
+lillie_test_clima
+```
+
+Se rechaza la hipotesis nula de normalidad para las variables:
+
+```{r echo=F}
+lillie_test[lillie_test < 0.05]
+lillie_test_indices[lillie_test_indices < 0.05]
+lillie_test_clima[lillie_test_clima < 0.05]
+
+```
+
+Esto se debe porque el valor p es menor a 0.05 para todas las variables y para que sea normal debe ser mayor. De forma que las variables cuantitativas no están distribuidas normalmente.
+
+## 4. Exploracion de datos Cualitativos
+
+```{r echo=F}
+
+# Seleccionar solo las variables no numéricas
+cualitativas <- datos[, !(names(datos) %in% numeric_vars)]
+cualitativas <- cualitativas[, !(names(cualitativas) %in% c("id"))]
+names(cualitativas)
+
+
+```
+
+```{r echo=F}
+cualitativas_ind <- datos_indice[, !(names(datos_indice) %in% names (numericas_indices))]
+cualitativas_ind <- cualitativas_ind[, !(names(cualitativas_ind) %in% c("IDCOMP","ABS_IDCOMP"))]
+names(cualitativas_ind) <- gsub("\r\n", "", names(cualitativas_ind))
+
+names(cualitativas_ind)
+
+```
+
+```{r echo=F}
+cualitativas_clima <- datos_clima[, !(names(datos_clima) %in% names(numericas_clima))]
+names(cualitativas_clima)
+```
+
+```{r echo =F}
+cat("\nResumen de la variable id:\n")
+id_summary <- table(datos$id)
+cat("Cantidad total de datos:", sum(id_summary), "\n")
+cat("Cantidad de categorías únicas:", length(id_summary), "\n")
+cat("Cantidad de datos por categoría:\n")
+print(summary(id_summary))
+```
+
+```{r echo=F}
+# Gráficos de barras para las variables cualitativas de 'datos'
+for (col in names(cualitativas)) {
+  p <- ggplot(cualitativas, aes_string(x = col)) +
+    geom_bar() +
+    labs(x = col, y = "Frecuencia") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  print(p)
+}
+
+# Gráficos de barras para las variables cualitativas de 'datos_indice'
+for (col in names(cualitativas_ind)) {
+  p <- ggplot(cualitativas_ind, aes_string(x = col)) +
+    geom_bar() +
+    labs(x = col, y = "Frecuencia_INDICE") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  print(p)
+}
+
+# Gráficos de barras para las variables cualitativas de 'datos_clima'
+for (col in names(cualitativas_clima)) {
+  p <- ggplot(cualitativas_clima, aes_string(x = col)) +
+    geom_bar() +
+    labs(x = col, y = "Frecuencia_CLIMA") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+  print(p)
+}
+```
+
+```{r echo=F}
+col <- "tipo_muestra"
+p <- ggplot(cualitativas, aes_string(x = col, y = col)) +
+    geom_bar(stat = "identity") +
+    labs(x = col, y = col)
+
+print(p)
+```
+
+```{r echo=F}
+col <- "zafra"
+p <- ggplot(cualitativas, aes_string(x = col, y = col)) +
+    geom_bar(stat = "identity") +
+    labs(x = col, y = col)
+
+print(p)
+```
+
+```{r echo=F}
+col <- "prod_mad"
+p <- ggplot(cualitativas, aes_string(x = col, y = col)) +
+    geom_bar(stat = "identity") +
+    labs(x = col, y = col)
+
+print(p)
+```
+
+```{r echo=F}
+
+col <- "fecha_mad"
+p <- ggplot(cualitativas, aes_string(x = col, y = col)) +
+    geom_bar(stat = "identity") +
+    labs(x = col, y = col)
+
+print(p)
+```

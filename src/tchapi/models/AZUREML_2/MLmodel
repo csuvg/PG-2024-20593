@@ -1,0 +1,85 @@
+artifact_path: outputs/mlflow-model
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.9.19
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: pickle
+    sklearn_version: 1.5.1
+metadata:
+  azureml.base_image: mcr.microsoft.com/azureml/curated/ai-ml-automl:5
+  azureml.engine: automl
+mlflow_version: 2.9.2
+model_size_bytes: 9640111
+model_uuid: e65398084f4e42b5b0834d44c76f8ed9
+run_id: prueba_mlv2_40
+signature:
+  inputs: '[{"type": "double", "name": "area"}, {"type": "double", "name": "numero_corte"},
+    {"type": "double", "name": "ETP_Q1_mean"}, {"type": "double", "name": "ETP_Q1_sum"},
+    {"type": "double", "name": "ETP_Q1_std"}, {"type": "double", "name": "ETP_Q2_std"},
+    {"type": "double", "name": "Radiacion (MJ/m2)_Q1_mean"}, {"type": "double", "name":
+    "Radiacion (MJ/m2)_Q2_mean"}, {"type": "double", "name": "Radiacion (MJ/m2)_Q1_std"},
+    {"type": "double", "name": "Radiacion (MJ/m2)_Q2_std"}, {"type": "double", "name":
+    "Amplitud T\u00e9rmica_Q1_mean"}, {"type": "double", "name": "Amplitud T\u00e9rmica_Q1_std"},
+    {"type": "double", "name": "Amplitud T\u00e9rmica_Q2_std"}, {"type": "double",
+    "name": "Amplitud T\u00e9rmica_6m_std"}, {"type": "double", "name": "R0_Q1_mean"},
+    {"type": "double", "name": "R0_Q1_std"}, {"type": "double", "name": "temperatura_Q1_mean"},
+    {"type": "double", "name": "temperatura_Q1_std"}, {"type": "double", "name": "humedad
+    relativa_Q1_mean"}, {"type": "double", "name": "humedad relativa_Q2_mean"}, {"type":
+    "double", "name": "humedad relativa_Q1_std"}, {"type": "double", "name": "humedad
+    relativa minima_Q1_mean"}, {"type": "double", "name": "humedad relativa minima_Q2_mean"},
+    {"type": "double", "name": "humedad relativa minima_Q1_std"}, {"type": "double",
+    "name": "humedad relativa minima_Q2_std"}, {"type": "double", "name": "humedad
+    relativa minima_6m_std"}, {"type": "double", "name": "humedad relativa maxima_Q1_mean"},
+    {"type": "double", "name": "precipitacion_Q1_mean"}, {"type": "double", "name":
+    "precipitacion_Q2_mean"}, {"type": "double", "name": "velocidad viento_Q1_mean"},
+    {"type": "double", "name": "velocidad viento_Q1_sum"}, {"type": "double", "name":
+    "velocidad viento_Q1_std"}, {"type": "double", "name": "velocidad viento_Q2_std"},
+    {"type": "double", "name": "velocidad viento_6m_std"}, {"type": "double", "name":
+    "velocidad viento minima_Q1_mean"}, {"type": "double", "name": "velocidad viento
+    minima_Q1_sum"}, {"type": "double", "name": "velocidad viento minima_Q1_std"},
+    {"type": "double", "name": "velocidad viento maxima_Q1_mean"}, {"type": "double",
+    "name": "velocidad viento maxima_Q1_sum"}, {"type": "double", "name": "velocidad
+    viento maxima_Q1_std"}, {"type": "double", "name": "velocidad viento maxima_Q2_std"},
+    {"type": "double", "name": "velocidad viento maxima_6m_std"}, {"type": "double",
+    "name": "direccion viento_Q1_mean"}, {"type": "double", "name": "direccion viento_Q1_std"},
+    {"type": "double", "name": "direccion viento_Q2_std"}, {"type": "double", "name":
+    "direccion viento_6m_std"}, {"type": "double", "name": "NDVI_POND_6m_integral"},
+    {"type": "double", "name": "NDVI_POND_q1_integral"}, {"type": "double", "name":
+    "LAI_POND_q1_integral"}, {"type": "double", "name": "PRODUCCION_PON_6m_integral"},
+    {"type": "double", "name": "PRODUCCION_PON_q1_integral"}, {"type": "double", "name":
+    "ANOMALIAS_POND_6m_integral"}, {"type": "double", "name": "ANOMALIAS_POND_q1_integral"},
+    {"type": "double", "name": "NDVI_POND_Q1_mean"}, {"type": "double", "name": "NDVI_POND_Q2_mean"},
+    {"type": "double", "name": "NDVI_POND_Q1_std"}, {"type": "double", "name": "NDVI_POND_Q2_std"},
+    {"type": "double", "name": "LAI_POND_Q1_mean"}, {"type": "double", "name": "LAI_POND_Q2_mean"},
+    {"type": "double", "name": "LAI_POND_Q1_std"}, {"type": "double", "name": "LAI_POND_Q2_std"},
+    {"type": "double", "name": "PRODUCCION_PON_Q1_mean"}, {"type": "double", "name":
+    "PRODUCCION_PON_Q2_mean"}, {"type": "double", "name": "PRODUCCION_PON_Q1_std"},
+    {"type": "double", "name": "PRODUCCION_PON_Q2_std"}, {"type": "double", "name":
+    "ANOMALIAS_POND_Q1_std"}, {"type": "double", "name": "HUMEDAD_POND_Q1_mean"},
+    {"type": "double", "name": "HUMEDAD_POND_Q2_mean"}, {"type": "double", "name":
+    "HUMEDAD_POND_Q1_std"}, {"type": "double", "name": "HUMEDAD_POND_Q2_std"}, {"type":
+    "double", "name": "prod_mad_Bioestimulante"}, {"type": "double", "name": "prod_mad_Bispiribac"},
+    {"type": "double", "name": "prod_mad_Bispiribac Sodio"}, {"type": "double", "name":
+    "prod_mad_Glifosato"}, {"type": "double", "name": "prod_mad_Glifosato + Boro"},
+    {"type": "double", "name": "prod_mad_Glifosato + Etephon"}, {"type": "double",
+    "name": "prod_mad_Madurez Natural"}, {"type": "double", "name": "prod_mad_Protectante"},
+    {"type": "double", "name": "prod_mad_Protector Solar"}, {"type": "double", "name":
+    "prod_mad_Trinexapac"}, {"type": "double", "name": "prod_mad_Trinexapac + Boro"},
+    {"type": "double", "name": "prod_mad_Trinexapac + Etephon"}, {"type": "double",
+    "name": "sist_riego_aspersion"}, {"type": "double", "name": "sist_riego_goteo"},
+    {"type": "double", "name": "sist_riego_gravedad"}, {"type": "double", "name":
+    "sist_riego_pivote"}, {"type": "double", "name": "sist_riego_sin riego"}, {"type":
+    "double", "name": "tipo_cosecha_MANUAL"}, {"type": "double", "name": "region"},
+    {"type": "double", "name": "estrato"}, {"type": "double", "name": "estacion"},
+    {"type": "double", "name": "variedad"}, {"type": "double", "name": "cuadrante"}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float64", "shape": [-1]}}]'
+  params: null
+utc_time_created: '2024-10-05 06:03:19.432496'

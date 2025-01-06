@@ -1,0 +1,8 @@
+__pycache__
+logs
+data/SHAPES
+data/PROCESS/processed_tch_prediction_data_10Mesv7.csv 
+data/PROCESS/processed_tch_prediction_data_8Mesv7.csv  
+data/PROCESS/processed_tch_prediction_data_6Mesv7.csv 
+data/outputv5.geojson
+data/outputv6.geojson
